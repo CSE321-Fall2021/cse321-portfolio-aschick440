@@ -37,6 +37,14 @@ InterruptIn B_inter(some port/pin);                 // B pressed - transitions t
 InterruptIn Zero_inter(some port/pin);              // curr_time == 0 - transitions to timer_finished state ** this is not an interrupt
                                                     // just use timer_finished as normal function
 
+// disable_irq, maybe disabled interrupt pin until enable_irq, https://os.mbed.com/docs/mbed-os/v6.15/mbed-os-api-doxy/group__hal__gpioirq.html#ga437a99b34e5c1938d91f61f12aa69f27
+// diable certain interrupts when in specific states 
+// only disable within irq functions never in main
+// only poll for numerical keypad entries in: setting_timer() state
+// Poll for specific alphabetical inputs (not all) in each individual interrupt handler
+
+// keypad code ref, https://controllerstech.com/use-4x4-keypad-with-stm32/
+
 /*
 
     **NOTE**
@@ -61,7 +69,6 @@ char times_up_p[] = "times up";                     // LCD display when timer_fi
 
 // LCD Object
 CSE321_LCD objName( col, row, dots, SDA, SLA);      // creates LCD object, Need to define parameters
-begin();                                            // initialize LCD
 
 /*
     LCD API functions
@@ -70,8 +77,11 @@ begin();                                            // initialize LCD
     print("string") - prints to LCD
 */
 
+
+
 // main will instantly call the D interrupt
 int main(){
+    begin(objName);                                     // initialize LCD
     setting_timer();    
     return 0;                                       // will never return
 }
