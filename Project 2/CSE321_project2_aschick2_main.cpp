@@ -31,11 +31,11 @@
 
 // interrupts called when either use presses a key or a certain state is reached
 // For user enabled keys, keys will not always trigger interrupts, depends on the current state
-InterruptIn D_inter(some port/pin);                 // D pressed - transitions to setting_timer state                  
-InterruptIn A_inter(some port/pin);                 // A pressed - transitions to counting_down state 
-InterruptIn B_inter(some port/pin);                 // B pressed - transitions to timer_paused state
-InterruptIn Zero_inter(some port/pin);              // curr_time == 0 - transitions to timer_finished state ** this is not an interrupt
-                                                    // just use timer_finished as normal function
+// InterruptIn D_inter(some port/pin);                 // D pressed - transitions to setting_timer state                  
+// InterruptIn A_inter(some port/pin);                 // A pressed - transitions to counting_down state 
+// InterruptIn B_inter(some port/pin);                 // B pressed - transitions to timer_paused state
+// InterruptIn Zero_inter(some port/pin);              // curr_time == 0 - transitions to timer_finished state ** this is not an interrupt
+//                                                     // just use timer_finished as normal function
 
 // disable_irq, maybe disabled interrupt pin until enable_irq, https://os.mbed.com/docs/mbed-os/v6.15/mbed-os-api-doxy/group__hal__gpioirq.html#ga437a99b34e5c1938d91f61f12aa69f27
 // diable certain interrupts when in specific states 
@@ -54,10 +54,10 @@ InterruptIn Zero_inter(some port/pin);              // curr_time == 0 - transiti
 */
 
 // ISR functions
-void setting_timer();                               // called at start and for D_inter
-void counting_down();                               // called for A_inter
-void timer_paused();                                // called for B_inter
-void timer_finished();                              // called for Zero_inter
+// void setting_timer();                               // called at start and for D_inter
+// void counting_down();                               // called for A_inter
+// void timer_paused();                                // called for B_inter
+// void timer_finished();                              // called for Zero_inter
 
 // variables
 int curr_time = 0;                                  // stores the current time in seconds, initalized to 0
@@ -68,7 +68,7 @@ char time_remaining_p[] = "time remaining";         // LCD display when counting
 char times_up_p[] = "times up";                     // LCD display when timer_finished
 
 // LCD Object
-CSE321_LCD objName( col, row, dots, SDA, SLA);      // creates LCD object, Need to define parameters
+CSE321_LCD timer_screen( 1, 12,  LCD_5x10DOTS, D14, D15);      // creates LCD object, Need to define parameters
 
 /*
     LCD API functions
@@ -77,49 +77,61 @@ CSE321_LCD objName( col, row, dots, SDA, SLA);      // creates LCD object, Need 
     print("string") - prints to LCD
 */
 
-
+Timer t;    // timer
 
 // main will instantly call the D interrupt
 int main(){
-    begin(objName);                                     // initialize LCD
-    setting_timer();    
+    t.start();                          // start the timer to count up
+    begin(timer_screen);                // used to set up LCD display
+    while (1){                          // makes the lcd blink even odd every .5 seconds 
+        timer_screen.setCursor(1, 1);
+        ThisThread::flags_wait_all_for(1, 500, 1); 
+        if (t.elapsed_time().count() % 2 == 0) {
+            timer_screen.clear();
+            timer_screen.print("even");
+        } else {
+            timer_screen.clear();
+            timer_screen.print("odd");
+        }
+    }
+    //setting_timer();    
     return 0;                                       // will never return
 }
 
 // Allows the user to input a time to 
-void setting_timer(){
-    int num_digits = 0;                             // will cap the user at only inputting 3 digits
-    while (num_digits < 3){
-        // use conditions to check if any keypad buttons have been pressed, if so calculate the button pressed
-        // only numbers of A will be taken in as inputs
-        // if the input was A call setting_timer
-        // if the input was a number light up red LED and add input to curr_time (remember each digit hold different weights)
-        // set prompt to set_digit_p + time         // sets prompt
-    }
-    A_inter.rise(setting_timer);                    // only when A is pressed will the timer begin again
-}
+// void setting_timer(){
+//     int num_digits = 0;                             // will cap the user at only inputting 3 digits
+//     while (num_digits < 3){
+//         // use conditions to check if any keypad buttons have been pressed, if so calculate the button pressed
+//         // only numbers of A will be taken in as inputs
+//         // if the input was A call setting_timer
+//         // if the input was a number light up red LED and add input to curr_time (remember each digit hold different weights)
+//         // set prompt to set_digit_p + time         // sets prompt
+//     }
+//     A_inter.rise(setting_timer);                    // only when A is pressed will the timer begin again
+// }
 	
-// timer on LCD will decrement by 1 every seconds i.e. curr_time--
-void counting_down(){
-    while (curr_time > 0){                          // run until the timer expires
-        ThisThread::flags_wait_all_for(1, 1000, 1); // only decrements every one second
-        // check B_inter                            // checks for pause
-        // check D_inter                            // checks for reset
-        curr_time--;                                // decrements time
-        // set prompt to time_remaining_p + time    // sets prompt
-    } 
-    timer_finished();                               // once timer expires the state will jump to timer_finished            
-}
+// // timer on LCD will decrement by 1 every seconds i.e. curr_time--
+// void counting_down(){
+//     while (curr_time > 0){                          // run until the timer expires
+//         ThisThread::flags_wait_all_for(1, 1000, 1); // only decrements every one second
+//         // check B_inter                            // checks for pause
+//         // check D_inter                            // checks for reset
+//         curr_time--;                                // decrements time
+//         // set prompt to time_remaining_p + time    // sets prompt
+//     } 
+//     timer_finished();                               // once timer expires the state will jump to timer_finished            
+// }
 	
-// the state of the timer on the LCD will freeze
-void timer_paused(){
-    A_inter.rise(setting_timer);                    // only when A is pressed will the timer begin again
-}
+// // the state of the timer on the LCD will freeze
+// void timer_paused(){
+//     A_inter.rise(setting_timer);                    // only when A is pressed will the timer begin again
+// }
 	
-// curr_time has reached 0 i.e. time has run out    
-void timer_finished(){
-    // set blue LED pin on
-    // set green LED pin on
-    // set prompt to times_up_p
+// // curr_time has reached 0 i.e. time has run out    
+// void timer_finished(){
+//     // set blue LED pin on
+//     // set green LED pin on
+//     // set prompt to times_up_p
 
-}
+// }
