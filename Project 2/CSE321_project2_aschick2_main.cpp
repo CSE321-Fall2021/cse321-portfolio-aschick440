@@ -32,7 +32,7 @@ int row;                    // row that is currently low
 char key = 'D';             // key pressed, starts out in setting time state
 int digits_entered = 0;     // number of digits the user has entered thus far 
 int digit = -1;             // if a digit key was pressed it will be stored here
-const int convert_micro = 1000000;                      // converts second to microseconds 
+const int convert_micro = 1000000;                          // converts second to microseconds 
 
 // LCD prompts
 char set_digit_p[] = "enter time: m:ss";                    // setting_timer
@@ -46,7 +46,7 @@ CSE321_LCD timer_screen( 1, 16,  LCD_5x10DOTS, D14, D15);   // creates LCD objec
 
 int main (){
     begin(timer_screen);                        // used to set up LCD display
-    timer_screen.setCursor(0, 1);               // set the cursor to the second row
+    timer_screen.setCursor(0, 1);               // set the cursor to the head of the second row
     RCC->AHB2ENR |= 0x5;                        // enable the port A and C clock
     GPIOC->MODER |= 0x550000;                   // mask pins to output to PC_8 - PC_11
     GPIOC->MODER &= ~(0xAA0000);                // mask pins to output to PC_8 - PC_11
@@ -56,19 +56,19 @@ int main (){
     col2.rise(&col2_key);
     col3.rise(&col3_key);
     col4.rise(&col4_key);
-    while (1) {                     // runs forever
-        keypad_poll();                          
-        if (key == 'D' || (key >= '0' && key <= '9')) {                             // runs when time is being set
-            setting_func();
+    while (1) {                         // runs forever
+        keypad_poll();                  // continously alternate power between rows
+        if (key == 'D' || (key >= '0' && key <= '9')) {                             // setting time
+            setting_func();             
         }
-        else if (curr_time.elapsed_time().count() < time_entered*convert_micro) {    // runs when the time has not finished
-            if (key == 'A') {
+        else if (curr_time.elapsed_time().count() < time_entered*convert_micro) {   // timer is in operation
+            if (key == 'A') {           // time is running     
                 running_func();
-            } else if (key == 'B') {
+            } else if (key == 'B') {    // time is paused
                 paused_func();
             }
         }
-        else {
+        else {                                                                      // time ran out
             finished_func();
         }
     }
@@ -77,15 +77,15 @@ int main (){
 
 void setting_func() {
     timer_screen.clear();                   // reset enter prompt
-    timer_screen.setCursor(0, 1);
-    timer_screen.print(set_digit_p);
+    timer_screen.setCursor(0, 1);           
+    timer_screen.print(set_digit_p);        // set the LCDs text
     curr_time.reset();                      // reset the timer
     if (digit != -1) {                      // runs if user has entered a digit
         char aChar;                         // stores integer to character conversion
-        if (digits_entered == 0) {
+        if (digits_entered == 0) {          // different functionality based on digits place in timer 
             time_entered = digit;           // 1s place
             digits_entered++;               // increment the digits entered
-            aChar = '0' + digit;
+            aChar = '0' + digit;            // convert digit (int) to char
             set_digit_p[15] = aChar;        // set the second 's' to the digit
             set_digit_p[14] = 's';
             set_digit_p[12] = 'm';
@@ -93,11 +93,11 @@ void setting_func() {
             timer_screen.setCursor(0, 1);
             timer_screen.print(set_digit_p);
         } else if (digits_entered == 1) {
-            if (digit > 5) {
+            if (digit > 5) {                // makes sure user can't input the an invalid 10s digit 
                 digit = -1;
                 timer_screen.setCursor(0, 1);
                 timer_screen.print(char_limit_p);
-                ThisThread::sleep_for(1s);
+                ThisThread::sleep_for(1s);  // sleeps the thread to display prompt briefly
                 return;
             }
             time_entered += (digit * 10);   // 10s place
@@ -121,45 +121,49 @@ void setting_func() {
     // if 3 digits have been entered this should do nothing and just wait for the user to start
 }
 
+// the state of the LCD when the timer is paused
 void paused_func() {
     digits_entered = 0;
-    curr_time.stop();
+    curr_time.stop();                       // stops the timer until started
     timer_screen.setCursor(0, 1);
     timer_screen.print(time_paused_p);
     ThisThread::sleep_for(15ms);
 }
 
+// the state of the LCD when the timer is counting down
 void running_func() { 
     digits_entered = 0;
     curr_time.start();
-    int time_diff = time_entered - curr_time.elapsed_time().count()/1000000; // time difference between user inputted and the timer
-    char aChar = '0' + floor(time_diff/60);
-    time_remaining_p[11] = aChar;
+    int time_diff = time_entered - curr_time.elapsed_time().count()/1000000; // time difference between user inputted time and the timer
+    char aChar = '0' + floor(time_diff/60); // use floor to only display int
+    time_remaining_p[11] = aChar;           // change min slot
     time_diff -= floor(time_diff/60)*60;
     aChar = '0' + floor(time_diff/10);
-    time_remaining_p[13] = aChar;
+    time_remaining_p[13] = aChar;           // change 10s slot
     time_diff -= floor(time_diff/10)*10;
     aChar = '0' + floor(time_diff);
-    time_remaining_p[14] = aChar;
+    time_remaining_p[14] = aChar;           // change 1s slot
     timer_screen.clear();
-    timer_screen.setCursor(0, 1);           // set the LCDs cursor
+    timer_screen.setCursor(0, 1);           
     timer_screen.print(time_remaining_p);
     ThisThread::sleep_for(15ms);
 }
 
+// the state of the LCD when time has ran out
 void finished_func() {
-    GPIOA->ODR |= 0xc0; 
+    GPIOA->ODR |= 0xc0;                     // turn on the green LEDs
     digits_entered = 0;
     curr_time.stop();
     timer_screen.clear();
     timer_screen.setCursor(0, 1);
     timer_screen.print(times_up_p);
     ThisThread::sleep_for(15ms);
-    GPIOA->ODR &= ~(0xc0); 
+    GPIOA->ODR &= ~(0xc0);                  // turn off the green LEDs, only really turns off when 'D' is pressed again 
 }
 
+// poll to see which key, if any, has been pressed
 void keypad_poll() {
-    row = 1;
+    row = 1;                        // row 1 is being set High
     GPIOC->ODR |= 0x100;            // set row 1 High
     GPIOC->ODR &= ~(0xe00);         // set other rows low
     row = 2;
@@ -175,11 +179,11 @@ void keypad_poll() {
 
 // col1 
 void col1_key(){
-    col1.disable_irq();
-    GPIOA->ODR |= 0x20;
-    if (row == 1) {
-        key = '1';
-        digit = 1;
+    col1.disable_irq();             // disable this interrupt to negate bounce
+    GPIOA->ODR |= 0x20;             // turn on the red LED
+    if (row == 1) {                 // figure out which row the key corresponds too
+        key = '1';                  // set the key entered
+        digit = 1;                  // set the digit entered
     } else if (row == 2) {
         key = '4';
         digit = 4;
@@ -189,9 +193,9 @@ void col1_key(){
     } else {
         key = '*';
     }
-    wait_us(400000);
-    GPIOA->ODR &= ~(0x20);
-    col1.enable_irq();
+    wait_us(400000);                // wait for bounce to settle down
+    GPIOA->ODR &= ~(0x20);          // turn off the red LED
+    col1.enable_irq();              // re-enable the interrupt
 }
 
 void col2_key(){
