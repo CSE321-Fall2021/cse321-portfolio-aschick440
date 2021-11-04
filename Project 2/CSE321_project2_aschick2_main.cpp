@@ -1,137 +1,236 @@
-/**
-    File:   CSE321_project2_aschick2_main.c
-
-    Author1:        Andrew Schick (aschick2@buffalo.edu)
-    Date:           Fall 2021
-    Partner:        Solo submission
-    Course:         CSE 321 - Embedded Systems
-    Project:        project 2 Timer System
-    Modules:        main, setting_timer, counting_down, timer_paused, timer_finished 
-    Inputs:         4x4 Matrix Keypad (0-9, A, B, D)
-    Outputs:        green LED, blue LED, red LED, LCD display
-    Constraints:    runs forever, timer ranges from 0:00 to 9:59 m:ss  
-    Interrupts:     D_inter, A_inter, B_inter, Zero_inter (corresponds to order of modules above)
-
-    File Summary:
-        This program will prodcue a countdown alarm displayed on an LCD 
-        where users can input the time and control the timers' behavior
-        assuming the peripherals are properly hooked up.
-
-    References:     
-        UB CSE 321 Course Lecture Slides
-        RM0432 Reference manual (Nucleo L4R5ZI reference)
-        JDH_1804_Datasheet.pdf (LCD operational manual) 
-        1802.cpp (given LCD code)
-        1802.h (given LCD library)
-        LCD Library/API instructions
-**/
-
 #include "mbed.h"
 #include "1802.h"
+#include <ctime>
 
-// interrupts called when either use presses a key or a certain state is reached
-// For user enabled keys, keys will not always trigger interrupts, depends on the current state
-// InterruptIn D_inter(some port/pin);                 // D pressed - transitions to setting_timer state                  
-// InterruptIn A_inter(some port/pin);                 // A pressed - transitions to counting_down state 
-// InterruptIn B_inter(some port/pin);                 // B pressed - transitions to timer_paused state
-// InterruptIn Zero_inter(some port/pin);              // curr_time == 0 - transitions to timer_finished state ** this is not an interrupt
-//                                                     // just use timer_finished as normal function
+// input pins to Nucleo (ODR): PD_4 - PD_7     : c1 = 7, c4 = 4
+// output pins from Nucleo (IDR): PC_8 - PC_11 : r1 = 8, r4 = 11
 
-// disable_irq, maybe disabled interrupt pin until enable_irq, https://os.mbed.com/docs/mbed-os/v6.15/mbed-os-api-doxy/group__hal__gpioirq.html#ga437a99b34e5c1938d91f61f12aa69f27
-// diable certain interrupts when in specific states 
-// only disable within irq functions never in main
-// only poll for numerical keypad entries in: setting_timer() state
-// Poll for specific alphabetical inputs (not all) in each individual interrupt handler
+InterruptIn col1(PD_7, PullDown);     // col1 key pressed
+InterruptIn col2(PD_6, PullDown);     // col2 key pressed
+InterruptIn col3(PD_5, PullDown);     // col3 key pressed
+InterruptIn col4(PD_4, PullDown);     // col4 key pressed
 
-// keypad code ref, https://controllerstech.com/use-4x4-keypad-with-stm32/
-
-/*
-
-    **NOTE**
-    May only keep A_inter as it is useful when timer_paused
-    the rest of the states can just poll until a condition is met
-
-*/
+// states 
+void setting_func();
+void paused_func();
+void running_func();
+void finished_func();
+void keypad_poll();
 
 // ISR functions
-// void setting_timer();                               // called at start and for D_inter
-// void counting_down();                               // called for A_inter
-// void timer_paused();                                // called for B_inter
-// void timer_finished();                              // called for Zero_inter
+void col1_key();            // checks for col1 key pressed
+void col2_key();            // checks for col2 key pressed
+void col3_key();            // checks for col3 key pressed
+void col4_key();            // checks for col4 key pressed
 
-// variables
-int curr_time = 0;                                  // stores the current time in seconds, initalized to 0
+Timer curr_time;            // time to countdown from
+int time_entered;           // the number of seconds entered by user
 
-// values used for LCD prompts
-char set_digit_p[] = "enter prompt";                // LCD display when setting_timer
-char time_remaining_p[] = "time remaining";         // LCD display when counting_down
-char times_up_p[] = "times up";                     // LCD display when timer_finished
+int row;                    // row that is currently low
+char key = 'D';                // key pressed
+int digits_entered = 0;     // number of digits the user has entered thus far 
+int digit = -1;             // if a digit key was pressed it will be stored here
+int convert_micro = 1000000;
 
-// LCD Object
-CSE321_LCD timer_screen( 1, 12,  LCD_5x10DOTS, D14, D15);      // creates LCD object, Need to define parameters
+// LCD prompts
+char set_digit_p[] = "enter time: m:ss";                // setting_timer
+char time_remaining_p[] = "time left: m:ss";            // counting_down
+char times_up_p[] = "times up!";                        // timer_finished
+char time_paused_p[] = "paused at: ";                   // timer_paused
+char char_limit_p[] = "number exceeds 5";               // overflow error
 
-/*
-    LCD API functions
-    clear() - clears cursors current row
-    setCursor(a,b) - move cursor to row(a) and col(b)
-    print("string") - prints to LCD
-*/
 
-Timer t;    // timer
+CSE321_LCD timer_screen( 1, 16,  LCD_5x10DOTS, D14, D15);      // creates LCD object
 
-// main will instantly call the D interrupt
-int main(){
-    t.start();                          // start the timer to count up
-    begin(timer_screen);                // used to set up LCD display
-    while (1){                          // makes the lcd blink even odd every .5 seconds 
-        timer_screen.setCursor(1, 1);
-        ThisThread::flags_wait_all_for(1, 500, 1); 
-        if (t.elapsed_time().count() % 2 == 0) {
-            timer_screen.clear();
-            timer_screen.print("even");
-        } else {
-            timer_screen.clear();
-            timer_screen.print("odd");
+int main (){
+    begin(timer_screen);                        // used to set up LCD display
+    timer_screen.setCursor(0, 1);               // set the cursor to the second row
+    RCC->AHB2ENR |= 0x4;                        // enable the port C clock
+    GPIOC->MODER |= 0x550000;                   // mask pins to output to PC_8 - PC_11
+    GPIOC->MODER &= ~(0xAA0000);                // mask pins to output to PC_8 - PC_11
+    col1.rise(&col1_key);                        // All interrupts enabled on rising edge
+    col2.rise(&col2_key);
+    col3.rise(&col3_key);
+    col4.rise(&col4_key);
+    while (1) {                     // will run forever
+        keypad_poll();
+        if (key == 'D' || (key >= '0' && key <= '9')) {              // runs when time is being set
+            setting_func();
+        }
+        else if (curr_time.elapsed_time().count() < time_entered*convert_micro) {    // runs when the time has not finished
+            if (key == 'A') {
+                running_func();
+            } else if (key == 'B') {
+                paused_func();
+            }
+        }
+        else if (curr_time.elapsed_time().count() > time_entered*convert_micro) {
+             finished_func();
         }
     }
-    //setting_timer();    
-    return 0;                                       // will never return
+    return 0;                       // never returns
 }
 
-// Allows the user to input a time to 
-// void setting_timer(){
-//     int num_digits = 0;                             // will cap the user at only inputting 3 digits
-//     while (num_digits < 3){
-//         // use conditions to check if any keypad buttons have been pressed, if so calculate the button pressed
-//         // only numbers of A will be taken in as inputs
-//         // if the input was A call setting_timer
-//         // if the input was a number light up red LED and add input to curr_time (remember each digit hold different weights)
-//         // set prompt to set_digit_p + time         // sets prompt
-//     }
-//     A_inter.rise(setting_timer);                    // only when A is pressed will the timer begin again
-// }
-	
-// // timer on LCD will decrement by 1 every seconds i.e. curr_time--
-// void counting_down(){
-//     while (curr_time > 0){                          // run until the timer expires
-//         ThisThread::flags_wait_all_for(1, 1000, 1); // only decrements every one second
-//         // check B_inter                            // checks for pause
-//         // check D_inter                            // checks for reset
-//         curr_time--;                                // decrements time
-//         // set prompt to time_remaining_p + time    // sets prompt
-//     } 
-//     timer_finished();                               // once timer expires the state will jump to timer_finished            
-// }
-	
-// // the state of the timer on the LCD will freeze
-// void timer_paused(){
-//     A_inter.rise(setting_timer);                    // only when A is pressed will the timer begin again
-// }
-	
-// // curr_time has reached 0 i.e. time has run out    
-// void timer_finished(){
-//     // set blue LED pin on
-//     // set green LED pin on
-//     // set prompt to times_up_p
+void setting_func() {
+    timer_screen.clear();               // reset enter prompt
+    timer_screen.setCursor(0, 1);
+    timer_screen.print(set_digit_p);
+    if (digit != -1) {      // runs if user has entered a digit
+        char aChar;                         // stores integer to character conversion
+        if (digits_entered == 0) {
+            curr_time.reset();              // reset the timer
+            time_entered = digit;           // 1s place
+            digits_entered++;               // increment the digits entered
+            aChar = '0' + digit;
+            set_digit_p[15] = aChar;        // set the second 's' to the digit
+            digit = -1;                     // reset the digit
+            timer_screen.setCursor(0, 1);
+            timer_screen.print(set_digit_p);
+        } else if (digits_entered == 1) {
+            if (digit > 5) {
+                timer_screen.setCursor(0, 1);
+                timer_screen.print(char_limit_p);
+                ThisThread::sleep_for(5ms);
+                return;
+            }
+            time_entered += (digit * 10);   // 10s place
+            digits_entered++;
+            aChar = '0' + digit;               
+            set_digit_p[14] = aChar;        // set the first 's' to the digit
+            digit = -1;
+            timer_screen.setCursor(0, 1);
+            timer_screen.print(set_digit_p);
+        } else if (digits_entered == 2) { 
+            time_entered += (digit * 60);   // mins place
+            digits_entered++;      
+            aChar = '0' + digit;
+            set_digit_p[12] = aChar;        // set the 'm' to the digit
+            digit = -1;
+            timer_screen.setCursor(0, 1);
+            timer_screen.print(set_digit_p);
+        }
+    }
+    ThisThread::sleep_for(15ms); 
+    // if 3 digits have been entered this should do nothing and just wait for the user to start
+}
 
-// }
+void paused_func() {
+    digits_entered = 0;
+    curr_time.stop();
+    timer_screen.setCursor(0, 1);
+    timer_screen.print(time_paused_p);
+    ThisThread::sleep_for(15ms);
+}
+
+void running_func() { 
+    curr_time.start();
+    int time_diff = time_entered - curr_time.elapsed_time().count()/1000000; // time difference between user inputted and the timer
+    char aChar = '0' + floor(time_diff/60);
+    time_remaining_p[11] = aChar;
+    time_diff -= floor(time_diff/60)*60;
+    aChar = '0' + floor(time_diff/10);
+    time_remaining_p[13] = aChar;
+    time_diff -= floor(time_diff/10)*10;
+    aChar = '0' + floor(time_diff);
+    time_remaining_p[14] = aChar;
+    timer_screen.clear();
+    timer_screen.setCursor(0, 1);           // set the LCDs cursor
+    timer_screen.print(time_remaining_p);
+    ThisThread::sleep_for(15ms);
+}
+
+void finished_func() { 
+    digits_entered = 0;
+    curr_time.stop();
+    timer_screen.clear();
+    timer_screen.setCursor(0, 1);
+    timer_screen.print(times_up_p);
+    ThisThread::sleep_for(15ms);
+}
+
+void keypad_poll() {
+    row = 1;
+    GPIOC->ODR |= 0x100;            // set row 1 High
+    GPIOC->ODR &= ~(0xe00);         // set other rows low
+    row = 2;
+    GPIOC->ODR |= 0x200;        
+    GPIOC->ODR &= ~(0xd00);    
+    row = 3;
+    GPIOC->ODR |= 0x400;        
+    GPIOC->ODR &= ~(0xb00);   
+    row = 4;
+    GPIOC->ODR |= 0x800;      
+    GPIOC->ODR &= ~(0x700);    
+}
+
+// col1 
+void col1_key(){
+    col1.disable_irq();
+    if (row == 1) {
+        key = '1';
+        digit = 1;
+    } else if (row == 2) {
+        key = '4';
+        digit = 4;
+    } else if (row == 3) {
+        key = '7';
+        digit = 7;
+    } else {
+        key = '*';
+    }
+    wait_us(400000);
+    col1.enable_irq();
+}
+
+void col2_key(){
+    col2.disable_irq();
+    if (row == 1) {
+        key = '2';
+        digit = 2;
+    } else if (row == 2) {
+        key = '5';
+        digit = 5;
+    } else if (row == 3) {
+        key = '8';
+        digit = 8;
+    } else {
+        key = '0';
+        digit = 0;
+    }
+    wait_us(400000);
+    col2.enable_irq();
+}
+
+void col3_key(){
+    col3.disable_irq();
+    if (row == 1) {
+        key = '3';
+        digit = 3;
+    } else if (row == 2) {
+        key = '6';
+        digit = 6;
+    } else if (row == 3) {
+        key = '9';
+        digit = 9;
+    } else {
+        key = '#';
+    }
+    wait_us(400000);
+    col3.enable_irq();
+}
+
+void col4_key(){
+    col4.disable_irq();
+    if (row == 1) {
+        key = 'A';
+    } else if (row == 2) {
+        key = 'B';
+    } else if (row == 3) {
+        key = 'C';
+    } else {
+        time_entered = 0;
+        key = 'D';
+    }
+    wait_us(400000);
+    col4.enable_irq();
+}
