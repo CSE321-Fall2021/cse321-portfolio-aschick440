@@ -1,10 +1,12 @@
 #include "mbed.h"
 #include "1802.h"
+#include <cstdio>
 #include <ctime>
 
 // input pins to Nucleo (ODR): PD_4 - PD_7     : c1 = 7, c4 = 4
 // output pins from Nucleo (IDR): PC_8 - PC_11 : r1 = 8, r4 = 11
 
+// Keypad Interrupts
 InterruptIn col1(PD_7, PullDown);     // col1 key pressed
 InterruptIn col2(PD_6, PullDown);     // col2 key pressed
 InterruptIn col3(PD_5, PullDown);     // col3 key pressed
@@ -18,29 +20,29 @@ void finished_func();
 void keypad_poll();
 
 // ISR functions
-void col1_key();            // checks for col1 key pressed
-void col2_key();            // checks for col2 key pressed
-void col3_key();            // checks for col3 key pressed
-void col4_key();            // checks for col4 key pressed
+void col1_key();            // called when col1 key pressed
+void col2_key();            // called when col2 key pressed
+void col3_key();            // called when col3 key pressed
+void col4_key();            // called when col4 key pressed
 
 Timer curr_time;            // time to countdown from
 int time_entered;           // the number of seconds entered by user
 
 int row;                    // row that is currently low
-char key = 'D';                // key pressed
+char key = 'D';             // key pressed, starts out in setting time state
 int digits_entered = 0;     // number of digits the user has entered thus far 
 int digit = -1;             // if a digit key was pressed it will be stored here
-int convert_micro = 1000000;
+const int convert_micro = 1000000;                      // converts second to microseconds 
 
 // LCD prompts
-char set_digit_p[] = "enter time: m:ss";                // setting_timer
-char time_remaining_p[] = "time left: m:ss";            // counting_down
-char times_up_p[] = "times up!";                        // timer_finished
-char time_paused_p[] = "paused at: ";                   // timer_paused
-char char_limit_p[] = "number exceeds 5";               // overflow error
+char set_digit_p[] = "enter time: m:ss";                    // setting_timer
+char time_remaining_p[] = "time left: m:ss";                // counting_down
+const char times_up_p[] = "times up!";                      // timer_finished
+const char time_paused_p[] = "paused at: ";                 // timer_paused
+const char char_limit_p[] = "number exceeds 5";             // overflow error
 
 
-CSE321_LCD timer_screen( 1, 16,  LCD_5x10DOTS, D14, D15);      // creates LCD object
+CSE321_LCD timer_screen( 1, 16,  LCD_5x10DOTS, D14, D15);   // creates LCD object
 
 int main (){
     begin(timer_screen);                        // used to set up LCD display
@@ -48,13 +50,13 @@ int main (){
     RCC->AHB2ENR |= 0x4;                        // enable the port C clock
     GPIOC->MODER |= 0x550000;                   // mask pins to output to PC_8 - PC_11
     GPIOC->MODER &= ~(0xAA0000);                // mask pins to output to PC_8 - PC_11
-    col1.rise(&col1_key);                        // All interrupts enabled on rising edge
+    col1.rise(&col1_key);                       // All interrupts enabled on rising edge
     col2.rise(&col2_key);
     col3.rise(&col3_key);
     col4.rise(&col4_key);
-    while (1) {                     // will run forever
-        keypad_poll();
-        if (key == 'D' || (key >= '0' && key <= '9')) {              // runs when time is being set
+    while (1) {                     // runs forever
+        keypad_poll();                          
+        if (key == 'D' || (key >= '0' && key <= '9')) {                             // runs when time is being set
             setting_func();
         }
         else if (curr_time.elapsed_time().count() < time_entered*convert_micro) {    // runs when the time has not finished
@@ -64,33 +66,36 @@ int main (){
                 paused_func();
             }
         }
-        else if (curr_time.elapsed_time().count() > time_entered*convert_micro) {
-             finished_func();
+        else {
+            finished_func();
         }
     }
-    return 0;                       // never returns
+    return 0;
 }
 
 void setting_func() {
-    timer_screen.clear();               // reset enter prompt
+    timer_screen.clear();                   // reset enter prompt
     timer_screen.setCursor(0, 1);
     timer_screen.print(set_digit_p);
-    if (digit != -1) {      // runs if user has entered a digit
+    curr_time.reset();                      // reset the timer
+    if (digit != -1) {                      // runs if user has entered a digit
         char aChar;                         // stores integer to character conversion
         if (digits_entered == 0) {
-            curr_time.reset();              // reset the timer
             time_entered = digit;           // 1s place
             digits_entered++;               // increment the digits entered
             aChar = '0' + digit;
             set_digit_p[15] = aChar;        // set the second 's' to the digit
+            set_digit_p[14] = 's';
+            set_digit_p[12] = 'm';
             digit = -1;                     // reset the digit
             timer_screen.setCursor(0, 1);
             timer_screen.print(set_digit_p);
         } else if (digits_entered == 1) {
             if (digit > 5) {
+                digit = -1;
                 timer_screen.setCursor(0, 1);
                 timer_screen.print(char_limit_p);
-                ThisThread::sleep_for(5ms);
+                ThisThread::sleep_for(1s);
                 return;
             }
             time_entered += (digit * 10);   // 10s place
@@ -123,6 +128,7 @@ void paused_func() {
 }
 
 void running_func() { 
+    digits_entered = 0;
     curr_time.start();
     int time_diff = time_entered - curr_time.elapsed_time().count()/1000000; // time difference between user inputted and the timer
     char aChar = '0' + floor(time_diff/60);
@@ -228,7 +234,6 @@ void col4_key(){
     } else if (row == 3) {
         key = 'C';
     } else {
-        time_entered = 0;
         key = 'D';
     }
     wait_us(400000);
