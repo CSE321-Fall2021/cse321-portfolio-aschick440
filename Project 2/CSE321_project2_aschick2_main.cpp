@@ -47,9 +47,11 @@ CSE321_LCD timer_screen( 1, 16,  LCD_5x10DOTS, D14, D15);   // creates LCD objec
 int main (){
     begin(timer_screen);                        // used to set up LCD display
     timer_screen.setCursor(0, 1);               // set the cursor to the second row
-    RCC->AHB2ENR |= 0x4;                        // enable the port C clock
+    RCC->AHB2ENR |= 0x5;                        // enable the port A and C clock
     GPIOC->MODER |= 0x550000;                   // mask pins to output to PC_8 - PC_11
     GPIOC->MODER &= ~(0xAA0000);                // mask pins to output to PC_8 - PC_11
+    GPIOA->MODER |= 0x5400;                     // mask pins to output to PA_5 (key pressed) PA_6 and PA_7 () (times up)
+    GPIOA->MODER &= ~(0xab00);                  // mask pins to output to PA_5, PA_6, PA_7
     col1.rise(&col1_key);                       // All interrupts enabled on rising edge
     col2.rise(&col2_key);
     col3.rise(&col3_key);
@@ -145,13 +147,15 @@ void running_func() {
     ThisThread::sleep_for(15ms);
 }
 
-void finished_func() { 
+void finished_func() {
+    GPIOA->ODR |= 0xc0; 
     digits_entered = 0;
     curr_time.stop();
     timer_screen.clear();
     timer_screen.setCursor(0, 1);
     timer_screen.print(times_up_p);
     ThisThread::sleep_for(15ms);
+    GPIOA->ODR &= ~(0xc0); 
 }
 
 void keypad_poll() {
@@ -172,6 +176,7 @@ void keypad_poll() {
 // col1 
 void col1_key(){
     col1.disable_irq();
+    GPIOA->ODR |= 0x20;
     if (row == 1) {
         key = '1';
         digit = 1;
@@ -185,11 +190,13 @@ void col1_key(){
         key = '*';
     }
     wait_us(400000);
+    GPIOA->ODR &= ~(0x20);
     col1.enable_irq();
 }
 
 void col2_key(){
     col2.disable_irq();
+    GPIOA->ODR |= 0x20;        
     if (row == 1) {
         key = '2';
         digit = 2;
@@ -204,11 +211,13 @@ void col2_key(){
         digit = 0;
     }
     wait_us(400000);
+    GPIOA->ODR &= ~(0x20);
     col2.enable_irq();
 }
 
 void col3_key(){
     col3.disable_irq();
+    GPIOA->ODR |= 0x20;
     if (row == 1) {
         key = '3';
         digit = 3;
@@ -222,11 +231,13 @@ void col3_key(){
         key = '#';
     }
     wait_us(400000);
+    GPIOA->ODR &= ~(0x20);
     col3.enable_irq();
 }
 
 void col4_key(){
     col4.disable_irq();
+    GPIOA->ODR |= 0x20;
     if (row == 1) {
         key = 'A';
     } else if (row == 2) {
@@ -237,5 +248,6 @@ void col4_key(){
         key = 'D';
     }
     wait_us(400000);
+    GPIOA->ODR &= ~(0x20);
     col4.enable_irq();
 }
