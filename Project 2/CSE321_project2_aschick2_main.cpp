@@ -22,13 +22,21 @@
 
     References:     
         UB CSE 321 Course Lecture Slides
+        https://drive.google.com/drive/folders/1HSv1SSnKlJqvCXl3hbqz8I6bmRXM0QZy
         Nucleo L4R5ZI pin layout diagram
+        https://www.st.com/resource/en/user_manual/dm00368330-stm32-nucleo-144-boards-mb1312-stmicroelectronics.pdf
         MBED OS baremetal reference sheet
+        https://os.mbed.com/docs/mbed-os/v6.15/apis/index.html 
         Standard C++ library
+        https://en.cppreference.com/w/cpp/header
         RM0432 Reference manual (Nucleo L4R5ZI reference)
-        JDH_1804_Datasheet.pdf (LCD operational manual) 
+        https://www.st.com/resource/en/reference_manual/dm00310109-stm32l4-series-advanced-armbased-32bit-mcus-stmicroelectronics.pdf
+        JDH_1804_Datasheet.pdf (LCD operational manual)
+        https://learn-us-east-1-prod-fleet02-xythos.content.blackboardcdn.com/5e00ea752296c/10911180?X-Blackboard-Expiration=1636124400000&X-Blackboard-Signature=WJEqhTeGYBwyjhecErnD03%2FVxH7GcX4dk9iQu0CQsDk%3D&X-Blackboard-Client-Id=100310&response-cache-control=private%2C%20max-age%3D21600&response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%27JDH_1804_Datasheet.pdf&response-content-type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20211105T090000Z&X-Amz-SignedHeaders=host&X-Amz-Expires=21600&X-Amz-Credential=AKIAZH6WM4PL5SJBSTP6%2F20211105%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=13cac5f287e56358e05aeb6c8feef0b85c9a77e5d7f802a6a48d8d3ce5e25838 
         1802.cpp (given LCD code)
+        https://learn-us-east-1-prod-fleet02-xythos.content.blackboardcdn.com/5e00ea752296c/10910994?X-Blackboard-Expiration=1636124400000&X-Blackboard-Signature=pZBgiCDZlUGlLHC623Hc2hUGfpog3aCUUR%2FIvXtzAFw%3D&X-Blackboard-Client-Id=100310&response-cache-control=private%2C%20max-age%3D21600&response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%271802.cpp&response-content-type=text%2Fx-c&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20211105T090000Z&X-Amz-SignedHeaders=host&X-Amz-Expires=21600&X-Amz-Credential=AKIAZH6WM4PL5SJBSTP6%2F20211105%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a217e88a642dc97899ebae343b2dc122e8d5e57fdfdd4c2d73dfc94158d10e0d
         1802.h (given LCD library)
+        https://learn-us-east-1-prod-fleet02-xythos.content.blackboardcdn.com/5e00ea752296c/10910995?X-Blackboard-Expiration=1636124400000&X-Blackboard-Signature=fk8ij77VqCofwkZi3NIeQVdB5GUxMpAmBW9qQSSqo%2Bw%3D&X-Blackboard-Client-Id=100310&response-cache-control=private%2C%20max-age%3D21600&response-content-disposition=inline%3B%20filename%2A%3DUTF-8%27%271802.h&response-content-type=text%2Fx-c&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20211105T090000Z&X-Amz-SignedHeaders=host&X-Amz-Expires=21600&X-Amz-Credential=AKIAZH6WM4PL5SJBSTP6%2F20211105%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c4a1fec36c7fbd9264cbc6f9dcfdf1a89830d02d841e02ce8626babfaa065b1d
 **/
 
 
