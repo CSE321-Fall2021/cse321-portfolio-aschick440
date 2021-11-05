@@ -1,3 +1,37 @@
+/**
+    File:   CSE321_project2_aschick2_main.c
+
+    Author1:        Andrew Schick (aschick2@buffalo.edu)
+    Date:           Fall 2021
+    Partner:        Solo submission
+    Course:         CSE 321 - Embedded Systems
+    Project:        project 2 Alarm Clock
+    Modules:        main, setting_func, paused_func, running_func_down, running_func_up, finished_func, keypad_poll  
+    Inputs:         4x4 Matrix Keypad (0-9, A, B, C, D)
+    Outputs:        2 green LEDs, 1 red LED, LCD display
+    Constraints:    runs forever 
+                    timer ranges from 0:00 to 9:59 m:ss 
+                    Only counts up or down, one at a time
+                    To debounce keys will not register clicks if multiple buttons are pressed at once
+
+    File Summary:
+        This program will prodcue a dual functional alarm that can 
+        either countdown or count up. The alarm will be displayed on an 
+        LCD where users can input the time and control the timers' 
+        behavior assuming the peripherals are properly hooked up.
+
+    References:     
+        UB CSE 321 Course Lecture Slides
+        Nucleo L4R5ZI pin layout diagram
+        MBED OS baremetal reference sheet
+        Standard C++ library
+        RM0432 Reference manual (Nucleo L4R5ZI reference)
+        JDH_1804_Datasheet.pdf (LCD operational manual) 
+        1802.cpp (given LCD code)
+        1802.h (given LCD library)
+**/
+
+
 #include "mbed.h"
 #include "1802.h"
 #include <cstdio>
@@ -50,13 +84,13 @@ char current_time_p[] = "curr time: m:ss";                  // counting_up
 char time_counting_to_p[] = "counts to: m:ss";              // shows user what count up is counting to
 const char times_up_p[] = "times up!";                      // timer_finished
 const char down_time_paused_p[] = "paused at:     ";        // down timer_paused
-const char up_time_paused_p[] = "paused at: ";
+const char up_time_paused_p[] = "paused at: ";              // up timer_paused
 const char char_limit_p[] = "number exceeds 5";             // overflow error
 const char time_reached_p[] = "time reached!";              // expansion time reached
 const char counting_up_p[] = "counting up";                 // tells user timer counts up
 const char counting_down_p[] = "counting down";             // tells user timer counts down
 
-
+// 1802
 CSE321_LCD timer_screen( 1, 16,  LCD_5x10DOTS, D14, D15);   // creates LCD object
 
 int main (){
@@ -73,35 +107,35 @@ int main (){
     col4.rise(&col4_key);
     while (1) {                         // runs forever
         keypad_poll();                  // continously alternate power between rows
-        if (switch_direction) {
+        if (switch_direction) {         // display brief prompt when switching directions
             switch_direction = false;               // reset the switch
             count_down = !count_down;               // flip direction
             timer_screen.clear();                   // reset enter prompt
             timer_screen.setCursor(0, 0);     
             key = 'D';      
-            if (count_down) { timer_screen.print(counting_down_p); }       // set the LCDs text
+            if (count_down) { timer_screen.print(counting_down_p); }                // set the LCDs text
             else { timer_screen.print(counting_up_p); }
             ThisThread::sleep_for(1s);      
         }
-        if (key == 'D' || (key >= '0' && key <= '9')) {                         // setting time
+        if (key == 'D' || (key >= '0' && key <= '9')) {                             // setting time
             setting_func();             
         }
-        else if (curr_time.elapsed_time().count() < time_entered*convert_micro) {    // timer is in operation
-            if (count_down) {               // counting down
-                if (key == 'A') {           // time is running     
+        else if (curr_time.elapsed_time().count() < time_entered*convert_micro) {   // timer is in operation
+            if (count_down) {                   // counting down
+                if (key == 'A') {               // time is running     
                     running_func_down();
-                } else if (key == 'B') {    // time is paused
+                } else if (key == 'B') {        // time is paused
                     paused_func();
                 }
-            } else {                        // counting up
-                if (key == 'A') {              
+            } else {                            // counting up
+                if (key == 'A') {                       
                     running_func_up();
                 } else if (key == 'B') {    
                     paused_func();
                 }
             }
         }
-        else {                                                                  // time ran out
+        else {                                                                      // time ran out
             finished_func();
         }    
     }
@@ -173,16 +207,16 @@ void running_func_down() {
     timer_screen.setCursor(0, 0);           
     timer_screen.print(time_remaining_p);
     int time_diff = time_entered - curr_time.elapsed_time().count()/1000000; // time difference between user inputted time and the timer
-    char aChar = '0' + floor(time_diff/60); // use floor to only display int
+    char aChar = '0' + floor(time_diff/60);     // use floor to only display int
     update_time[0] = aChar;
     time_diff -= floor(time_diff/60)*60;
     aChar = '0' + floor(time_diff/10);
-    update_time[2] = aChar;           // change 10s slot
+    update_time[2] = aChar;                     // change 10s slot
     time_diff -= floor(time_diff/10)*10;
     aChar = '0' + floor(time_diff);
-    update_time[3] = aChar;           // change 1s slot
-    timer_screen.setCursor(0, 1);           // print the time on row 1
-    timer_screen.print(update_time);           // change min slot
+    update_time[3] = aChar;                     // change 1s slot
+    timer_screen.setCursor(0, 1);               // print the time on row 1
+    timer_screen.print(update_time);            // change min slot
     ThisThread::sleep_for(15ms);
 }
 
