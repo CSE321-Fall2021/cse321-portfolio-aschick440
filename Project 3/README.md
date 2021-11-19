@@ -1,9 +1,9 @@
 -------------------
 About
 -------------------
-Project Description: 
+* Project Description: 
 _This system senses, maps, and recommends actions based upon a buildings humidity levels in different rooms._ 
-Contribitor List:
+* Contribitor List:
 Andrew Schick
 
 --------------------
