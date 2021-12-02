@@ -12,4 +12,4 @@ Project 2:
     Alarm clock
     
 Project 3:
-    Humidity Mapping and Recommendation system
+    Disability friendly games and security
