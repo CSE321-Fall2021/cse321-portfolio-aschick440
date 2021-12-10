@@ -89,6 +89,7 @@ Things Declared
 ----------
 
 
+// LED Matrix state
 const uint8_t get_hex_blink[8] = {0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80}; // grab col
 const int max_row = 7;                                                  // row size of the matrix
 const int max_col = 7;                                                  // col size of the matrix 
@@ -139,7 +140,7 @@ Custom Functions
 ----------
 
 
-/ Update cursor position : ran on main thread
+// Update cursor position : ran on main thread
 void decipher_max_digit();                                              
 void cursor_up();                                                       
 void cursor_left();
@@ -164,4 +165,4 @@ bool check_player_guess();
 void col1_key();                        
 void col2_key();                        
 void col3_key();                        
-void col4_key();        
+void col4_key();
