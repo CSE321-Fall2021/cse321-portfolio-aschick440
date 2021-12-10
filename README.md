@@ -6,10 +6,10 @@ About:
     All the project folders are named in chronological order.
     
 Project 1:
-    Blinking LED/starter project
+    Blinking LED/Starter Project
     
 Project 2:
-    Alarm clock
+    Alarm Clock
     
 Project 3:
-    Disability friendly games and security
+    Disability Friendly Pictionary
