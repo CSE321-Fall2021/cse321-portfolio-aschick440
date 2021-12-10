@@ -52,16 +52,21 @@ All reference links are present in the main.cpp file
 Getting Started
 --------------------
 * Connect the Nucleo to your computer using the USB.
-* Connect 3.3V or 5V to the + terminal on the breadboard
-* Connect gnd to the - terminal on the breadboard
-* Keypad :
-* subset col1 -> PE_6
+* Connect 3.3V or 5V to the + rail on the breadboard
+* Connect gnd to the - rail on the breadboard
+* Feel free to connect all component Vcc pins to the + rail and gnd pins to the - rail
+* Keypad : col4 -> PE_2, col3 -> PE_4, col2 -> PE_5, col1 -> PE_6, row2 -> PF_8, row1 -> PF_7
+* LCD : SDA -> SDA, SCL -> SCL
+* IR sensors : PC_0, PC1, PC_3, PC_4
+* Dot Matrix : DIN -> PA_7, CS -> PD_14, CLK -> PA_5
 * Clean build and run
  
 ---
 **NOTE**
 
-If all the lights on the dot matrix light up when the program starts running, unplug the usb and plug it back in 
+* If all the lights on the dot matrix light up when the program starts running, unplug the usb and plug it back in
+* When setting up, it is recommended to refer to the system schematic in the project document for a visual representation
+* Depending on which direction the dot matrix is facing, the IRs will move the cursor in different directions, so it doesn't matter which Douts connect to which pins
 
 ---
 
