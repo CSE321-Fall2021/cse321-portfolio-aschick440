@@ -64,17 +64,16 @@ Getting Started
 ---
 **NOTE**
 
-* If all the lights on the dot matrix light up when the program starts running, unplug the usb and plug it back in
 * When setting up, it is recommended to refer to the system schematic in the project document for a visual representation
-* Depending on which direction the dot matrix is facing, the IRs will move the cursor in different directions, so it doesn't matter which Douts connect to which pins
+* Depending on which direction the dot matrix is facing, the IRs will move the cursor in different directions, so it doesn't matter which IR Douts connect to which pins
+* If all the lights on the dot matrix light up when the program starts running, unplug the usb and plug it back in
 
 ---
 
 --------------------
-p1_code_provided.cpp:
+CSE321_project3_aschick2_main.cpp:
 --------------------
-**THESE ARE JUST INITIAL THOUGHTS ON LAYOUT**
-The program will begin in an initialization phase where it waits for the user’s location data. Then, the next initialization will be on relative DTH11 sensor mapping, the program needs these two user inputs to begin. Once these have been given, the final initialization will take place which computes how the dot matrix will display based on positioning of each DTH11 sensor. Every ~30 minutes there will be a ticker attached to an ISR to grab the current weather data. Outside of that, one thread will be constantly updating the dot map while the other thread computes the safe humidity levels and relative humidity levels of each room. If the humidity levels become too unsafe there will be an interrupt triggered that sets off the Buzzer and gives the user an LCD prompt to turn on the humidifier. Until a safe level is restored the buzzer will not turn off. 
+The program is an RTOS system that incorporates threading, synchronization, error correction, interrupts, and physical components that are used as digital inputs and outputs. At any one time there can be up to 4 threads running in parallel. Individual threads handle keypad polling, IR polling, Matrix updates, and the pictionary game state. The area of each threads activity is very clearly commented within the code. The top of the file includes the header, included libraries, all the Global state, and initializations on component Objects.
 
 ----------
 Things Declared
