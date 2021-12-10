@@ -2,9 +2,9 @@
 About
 -------------------
 Project Description:  
-* _This program will function as an embedded pictionary game withair drawing functionality. The users can make guesses and tallypoints by using the keypad. The LED Matrix will always display the drawers picture by monitoring arm motions with IRS._
+_This program will function as an embedded pictionary game withair drawing functionality. The users can make guesses and tallypoints by using the keypad. The LED Matrix will always display the drawers picture by monitoring arm motions with IRS._  
 Contribitor List:  
-* Andrew Schick
+_Andrew Schick_
 
 --------------------
 Features
@@ -33,15 +33,20 @@ Required Materials
 --------------------
 Resources and References
 --------------------
-* Open Weather Map API
-* C++ JSON conversion library
 * Nucleo User manual
-* LCD User manual
-* Dot matrix array manual
-* Buzzer User manual
-* DTH11 user manual
-* C++ library documentation
-* MBED API documentation
+* Nucleo Pin Layout
+* 1802 LCD Library
+* 7219 Dot Matrix Library
+* Standard C++ Library
+* MBED RTOS Documentation
+* CSE321 Lecture Slide Deck
+
+---
+**NOTE**
+
+All reference links are present in the main.cpp file
+
+---
 
 --------------------
 Getting Started
