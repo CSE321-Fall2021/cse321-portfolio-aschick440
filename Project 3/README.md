@@ -2,7 +2,7 @@
 About
 -------------------
 Project Description:  
-_This program will function as an embedded pictionary game withair drawing functionality. The users can make guesses and tallypoints by using the keypad. The LED Matrix will always display the drawers picture by monitoring arm motions with IRS._  
+_This program will function as an embedded pictionary game with air drawing functionality. The users can make guesses and tally points by using the keypad. The LED Matrix will always display the drawers picture by monitoring arm motions with IRs._  
 Contribitor List:  
 _Andrew Schick_
 
