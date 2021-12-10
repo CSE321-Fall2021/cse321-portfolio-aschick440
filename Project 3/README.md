@@ -1,35 +1,34 @@
-Old Project README Do Not Use
 -------------------
 About
 -------------------
 * Project Description: 
-_This system senses, maps, and recommends actions based upon a buildings humidity levels in different rooms._ 
+_This program will function as an embedded pictionary game withair drawing functionality. The users can make guesses and tallypoints by using the keypad. The LED Matrix will always display the drawers picture by monitoring arm motions with IRS. _ 
 * Contribitor List:
 Andrew Schick
 
 --------------------
 Features
 --------------------
-* Keypad for user zip-code input
-* Constant weather API polling
-* Multi-room humidity sensing
-* Building humidity map
-* Display of current humidity per room
-* Buzzer to alert individual of dangerous humidity levels
+* Keypad for to change game state and pen functionality
+* Continuously updating LED Dot Matrix to display the drawers picture
+* Blinking cursor LED
+* Eraser and pen up functionality
+* LCD to display current score, round, and time left
+* 4 IR sensors used to draw on the Dot Matrix
+* Ability to replay indefinitely
 
 --------------------
 Required Materials
 --------------------
 * Nucleo L4R5ZI
-* Jumper wires
-* 5 DTH11 sensors
-* Buzzer
-* LCD
+* Female to female jumper wires
+* Male to male jumper wires
+* 4 IR sensors
+* 1802 LCD
 * Breadboard
-* Resistors
 * Keypad
-* RGB LED dot-matrix array
-* Micro USB
+* 7219 LED Dot Matrix
+* Micro USB cable
 
 --------------------
 Resources and References
