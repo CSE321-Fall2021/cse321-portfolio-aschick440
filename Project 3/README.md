@@ -51,7 +51,19 @@ All reference links are present in the main.cpp file
 --------------------
 Getting Started
 --------------------
-Connect the Nucleo to your computer using the USB. Determine where the 5 humidity sensors will be placed. Place the sensors in those rooms and use jumper wires to attach them to port: **PLACEHOLDER**, pins: **PLACEHOLDER** on the microcontroller. Setup the keypad by plugging in the 4 column wires to port: **PLACEHOLDER**, pins: **PLACEHOLDER** and the 4 row wires to port: **PLACEHOLDER**, pins: **PLACEHOLDER**. Then connect the LCD to Vcc, gnd, SCL, and SCA on the microcontroller. **PLACEHOLDER FOR ATTACHING THE DOT MATRIX ARRAY AND BUZZER.** Run the program. The LCD will give a prompt to enter the locations zip-code. Then it will prompt the user to input the relative locations of each DTH11 sensor. Now the dot matrix will go through an initialization phase to compute the mapping. Followed by grabbing current weather data from the weather API. The humidity sensor should be fully operational at this time.
+* Connect the Nucleo to your computer using the USB.
+* Connect 3.3V or 5V to the + terminal on the breadboard
+* Connect gnd to the - terminal on the breadboard
+* Keypad :
+* subset col1 -> PE_6
+* Clean build and run
+ 
+---
+**NOTE**
+
+If all the lights on the dot matrix light up when the program starts running, unplug the usb and plug it back in 
+
+---
 
 --------------------
 p1_code_provided.cpp:
