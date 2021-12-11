@@ -87,42 +87,46 @@ The program is an RTOS system that incorporates threading, synchronization, timi
 ----------
 Things Declared
 ----------
-
-
-// LED Matrix state
-const uint8_t get_hex_blink[8] = {0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80}; // grab col
-const int max_row = 7;                                                  // row size of the matrix
-const int max_col = 7;                                                  // col size of the matrix 
-uint8_t matrix_state[8] = {0,0,0,0,0,0,0,0};                            // state of LED Matrix in : Idx = row, data stored 1's are cols lit
-uint8_t current_digit = Max7219::MAX7219_DIGIT_0;                       // 7219 row definition object
-bool pen_down = false;                                                  // state of the pen
-bool eraser_down = false;                                               // state of the eraser
-int cursor_col = 0;                                                     // cursors col postion
-int cursor_row = 0;                                                     // cursors row position
-
-// Game state
-const int guess_time = 25;                                              // time during round
-const int prep_time = 5;                                                // time between rounds   
-const int us_to_s = 1000000;                                            // microseconds to seconds
-const int total_rounds = 3;                                             // defines # of rounds in each game
-const uint32_t TIMEOUT_MS = 30000;                                      // watchdog timeout, watchdog is only ran within the game state
-bool game_t_start = true;                                               // set to false when game starts
-int current_round = 1;                                                  // current round within the game
-int player_guessing = -1;                                               // player with a guess in                     
-int players_score[3] = {0,0,0};                                         // the current score of each player
-Timer stage_time;                                                       // timer used for guessing and drawing stages
-
-// LCD state
-const char four_to_start[17] = "press 4 to start";                      // start game prompt
-const char game_over[11] =     "Game Over!";                            // game over prompt
-char current_time[3] =         "ss";                                    // current time left
-char scores[17] =              "  P1=0,P2=0,P3=0";                      // players scores
-char round_starts_in[13] =     "R1 starts in";                          // start game prompt
-
-// Keypad state
-char key = 'X';                                                         // key pressed, X represents a don't care
-int key_pad_row;                                                        // keypad row that is currently low
-
+### Global Constants  
+const uint8_t get_hex_blink[8] = {0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80};  
+const int max_row = 7;                                                 
+const int max_col = 7;  
+const int guess_time = 25;                                              
+const int prep_time = 5;                                                
+const int us_to_s = 1000000;                                           
+const int total_rounds = 3;                                           
+const uint32_t TIMEOUT_MS = 30000;  
+const char four_to_start[17] = "press 4 to start";                
+const char game_over[11] =     "Game Over!";  
+  
+### Global Variables  
+uint8_t matrix_state[8] = {0,0,0,0,0,0,0,0};                              
+uint8_t current_digit = Max7219::MAX7219_DIGIT_0;                         
+bool pen_down = false;                                                    
+bool eraser_down = false;                                                 
+int cursor_col = 0;                                                       
+int cursor_row = 0;                                                            
+bool game_t_start = true;                                               
+int current_round = 1;                                                  
+int player_guessing = -1;                                                               
+int players_score[3] = {0,0,0};                                      
+Timer stage_time;                                                     
+char current_time[3] =         "ss";                               
+char scores[17] =              "  P1=0,P2=0,P3=0";                  
+char round_starts_in[13] =     "R1 starts in";                          
+char key = 'X';                                              
+int key_pad_row;                                                          
+  
+### Threading and Synchronization  
+Mutex protect_matrix_state;                                        
+Thread blink_cursor_t;                                            
+Thread keypad_poll_t;                                                  
+Thread game_t;                                                                                       
+  
+### Objects   
+Max7219 LED(PA_7,PA_6,PA_5,PD_14);                                      
+CSE321_LCD LCD( 1, 16,  LCD_5x10DOTS, D14, D15);  
+  
 ----------
 API and Built In Elements Used
 ----------
