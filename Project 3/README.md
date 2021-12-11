@@ -145,43 +145,60 @@ Custom Functions
 ### main thread runs on  
 void decipher_max_digit();  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Finds the row object for the cursors current row  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : current_digit  
 void cursor_up();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Moves the cursor up
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;updates current_row  
 void cursor_left();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Moves the cursor left  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;updates current_col  
 void cursor_down();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Moves the cursor down
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;updates current_row  
 void cursor_right();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Moves cursor right 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;updates cursor_col  
   
 ### blink_cursor_t thread runs on    
 void cursor_blink();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Makes the cursor blink and updates LEDs  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-void turn_on_LED();
+void turn_on_LED();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 void turn_off_LED();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
   
 ### keypad_poll_t thread runs on  
 void keypad_poll();                                                       
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
   
 ### game_t thread runs on  
 void decipher_key();  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 void between_rounds();          
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 void during_rounds();           
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 bool check_player_guess();      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
   
 ### ISRs  
-void col1_key(); 
+void col1_key();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 void col2_key();                
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 void col3_key();                
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 void col4_key();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
