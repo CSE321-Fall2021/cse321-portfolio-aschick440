@@ -144,61 +144,61 @@ Custom Functions
 ----------
 ### main thread runs on  
 void decipher_max_digit();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Finds the row object for the cursors current row  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : finds the row object for the cursors current row  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : current_digit  
 void cursor_up();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Moves the cursor up
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;updates current_row  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : moves the cursor up  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : current_row  
 void cursor_left();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Moves the cursor left  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;updates current_col  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : moves the cursor left  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : current_col  
 void cursor_down();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Moves the cursor down
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;updates current_row  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : moves the cursor down  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : current_row  
 void cursor_right();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Moves cursor right 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;updates cursor_col  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : moves cursor right  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : cursor_col  
   
 ### blink_cursor_t thread runs on    
 void cursor_blink();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Makes the cursor blink and updates LEDs  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : takes the cursor blink and updates LEDs  
 void turn_on_LED();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : sets LED to blink from off -> on  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : matrix_state  
 void turn_off_LED();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : sets LED to blink from on -> off  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : matrix_state  
   
 ### keypad_poll_t thread runs on  
 void keypad_poll();                                                       
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : poll keypad for inputs  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : key_pad_row  
   
 ### game_t thread runs on  
 void decipher_key();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : maintains game continuity and flow between stages and new games   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : current_round, players_score, scores, key     
 void between_rounds();          
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : prep stage in between each round  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : round_starts_in, stage_time, matrix_state, current_time  
 void during_rounds();           
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : runs the draw/guess stage  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : key, stage_time, current_time  
 bool check_player_guess();      
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : Set the player who has guessed or confirm the corretness of their guess  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : key, player_guessing, players_score, scores    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns : True if the guess was correct, else False   
   
 ### ISRs  
 void col1_key();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : column 1 key pressed  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : key  
 void col2_key();                
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : column 2 key pressed  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : key  
 void col3_key();                
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : column 3 key pressed  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : key  
 void col4_key();  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functionality : column 4 key pressed  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Updates : key, pen_down, eraser_down  
