@@ -88,34 +88,33 @@ The program is an RTOS system that incorporates threading, synchronization, timi
 Things Declared
 ----------
 ### Global Constants  
+const uint32_t TIMEOUT_MS = 30000;  
 const uint8_t get_hex_blink[8] = {0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80};  
+const char four_to_start[17] = "press 4 to start";                
+const char game_over[11] =     "Game Over!";  
 const int max_row = 7;                                                 
 const int max_col = 7;  
 const int guess_time = 25;                                              
 const int prep_time = 5;                                                
 const int us_to_s = 1000000;                                           
 const int total_rounds = 3;                                           
-const uint32_t TIMEOUT_MS = 30000;  
-const char four_to_start[17] = "press 4 to start";                
-const char game_over[11] =     "Game Over!";  
   
 ### Global Variables  
 uint8_t matrix_state[8] = {0,0,0,0,0,0,0,0};                              
 uint8_t current_digit = Max7219::MAX7219_DIGIT_0;                         
 bool pen_down = false;                                                    
-bool eraser_down = false;                                                 
-int cursor_col = 0;                                                       
-int cursor_row = 0;                                                            
-bool game_t_start = true;                                               
-int current_round = 1;                                                  
-int player_guessing = -1;                                                               
-int players_score[3] = {0,0,0};                                      
-Timer stage_time;                                                     
+bool eraser_down = false;                                                                                                           
+bool game_t_start = true;                                                                                   
 char current_time[3] =         "ss";                               
 char scores[17] =              "  P1=0,P2=0,P3=0";                  
 char round_starts_in[13] =     "R1 starts in";                          
 char key = 'X';                                              
-int key_pad_row;                                                          
+int key_pad_row;
+int current_round = 1;                                                  
+int player_guessing = -1;                                                               
+int players_score[3] = {0,0,0};  
+int cursor_col = 0;                                                       
+int cursor_row = 0;  
   
 ### Threading and Synchronization  
 Mutex protect_matrix_state;                                        
@@ -126,7 +125,8 @@ Thread game_t;
 ### Objects   
 Max7219 LED(PA_7,PA_6,PA_5,PD_14);                                      
 CSE321_LCD LCD( 1, 16,  LCD_5x10DOTS, D14, D15);  
-  
+Timer stage_time;                                                       
+    
 ----------
 API and Built In Elements Used
 ----------
@@ -142,31 +142,46 @@ API and Built In Elements Used
 ----------
 Custom Functions
 ----------
-
-
-// Update cursor position : ran on main thread
-void decipher_max_digit();                                              
-void cursor_up();                                                       
-void cursor_left();
-void cursor_down();
-void cursor_right();
-
-// controls individual LED blinking : ran on blink_cursor_t thread
-void cursor_blink();                                                    
+### main thread runs on  
+void decipher_max_digit();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Finds the row object for the cursors current row  
+void cursor_up();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+void cursor_left();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+void cursor_down();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+void cursor_right();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+  
+### blink_cursor_t thread runs on    
+void cursor_blink();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
 void turn_on_LED();
-void turn_off_LED();
-
-// monitors keypad inputs : ran on keypad_poll_t thread
-void keypad_poll();                                                     
-
-// controls the game functionality : ran on game_t thread
-void decipher_key();                                                  
-void between_rounds();                                                 
-void during_rounds();                                                
-bool check_player_guess();                                          
-
-// ISR functions called on key presses
-void col1_key();                        
-void col2_key();                        
-void col3_key();                        
-void col4_key();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+void turn_off_LED();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+  
+### keypad_poll_t thread runs on  
+void keypad_poll();                                                       
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+  
+### game_t thread runs on  
+void decipher_key();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+void between_rounds();          
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+void during_rounds();           
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+bool check_player_guess();      
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+  
+### ISRs  
+void col1_key(); 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+void col2_key();                
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+void col3_key();                
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+void col4_key();  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
